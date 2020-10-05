@@ -42,7 +42,7 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> mStart;
     std::ofstream mStatisticFile;
 
-    bool mDraw = true;
+    static bool mDraw;
 };
 
 

@@ -26,14 +26,14 @@ std::vector<std::string> get_file_list(const std::string& path)
 
 int main() {
     auto algorithm = [](const std::string &type) {
-        auto model = cv::imread("../" + type + "_origin.jpg", cv::IMREAD_GRAYSCALE);
+        auto model = cv::imread("../origins/" + type + ".jpg", cv::IMREAD_GRAYSCALE);
         if (model.empty()) {
             std::cerr << "ERROR: Could not process model image!" << std::endl;
             return 1;
         }
-        ObjectDetectorBrisk detector(model, "../" + type + "_stat.csv");
+        ObjectDetectorBrisk detector(model, "../metrics/" + type + ".csv");
 
-        const auto &allFileNames = get_file_list("../img_" + type);
+        const auto &allFileNames = get_file_list("../images/" + type);
 
         std::cout << "If you don't want see all this " << allFileNames.size()
                   << " photos, just press esc!\n" << "Otherwise press any other button to see next\n";

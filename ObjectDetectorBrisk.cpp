@@ -6,8 +6,10 @@
 
 using namespace cv;
 
+bool ObjectDetectorBrisk::mDraw = true;
+
 ObjectDetectorBrisk::ObjectDetectorBrisk(const Mat &model, const std::string &filename) {
-    mStatisticFile.open (filename);
+    mStatisticFile.open(filename);
     mStatisticFile << "Image_name, Correct features, Localization error, Time (ms), Size\n";
     mBriskDescriptor = BRISK::create();
     mBfHammingMatcher = DescriptorMatcher::create(BFMatcher::BRUTEFORCE_HAMMING);
@@ -73,12 +75,6 @@ void ObjectDetectorBrisk::statisticAndDraw() {
         perspectiveTransform(obj_corners, scene_corners, H);
         auto end = std::chrono::high_resolution_clock::now();
 
-        std::vector<Point> object_corners;
-        for (const auto &point : scene_corners) {
-            object_corners.push_back(point);
-            object_corners.back().x += mModelImage.cols;
-        }
-
         float point_inside = 0;
         float distance_diff = 0;
         for (size_t i = 0; i < scene.size(); i++) {
@@ -100,6 +96,13 @@ void ObjectDetectorBrisk::statisticAndDraw() {
             drawMatches(mModelImage, mModelKeyPoints, mTrain.image, mTrain.keyPoints, mTrain.matches, result,
                         Scalar::all(-1), Scalar::all(-1),
                         std::vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+
+            std::vector<Point> object_corners;
+            for (const auto &point : scene_corners) {
+                object_corners.push_back(point);
+                object_corners.back().x += mModelImage.cols;
+            }
+
             polylines(result, object_corners, true, Scalar(0, 255, 0), 3);
 
             imshow("Good Matches & Object detection", result);
