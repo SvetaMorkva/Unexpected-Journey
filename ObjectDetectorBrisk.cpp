@@ -90,6 +90,9 @@ void ObjectDetectorBrisk::statisticAndDraw() {
         float time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(end-mStart).count();
         mStatisticFile << mTrain.filename << "," << pointsInside_avg << "," << distance_avg << "," <<
             time_diff << "," << mTrain.image.size().width << ":" << mTrain.image.size().height << "\n";
+        std::cout << "Correct features " << pointsInside_avg << "\nLocalization error "
+        << distance_avg << "\nTime (ms) " << time_diff << "\nSize " <<
+        mTrain.image.size().width << ":" << mTrain.image.size().height << "\n";
 
         if (mDraw) {
             Mat result;
