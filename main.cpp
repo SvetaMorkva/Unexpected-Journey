@@ -1,60 +1,79 @@
-#include "ObjectDetectorBrisk.h"
+#include "ObjectDetector.h"
+#include "fileutils.h"
 
 #include <iostream>
 #include <map>
 
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
-
-std::vector<std::string> get_file_list(const std::string& path)
+std::map<std::string, int> read()
 {
-    std::vector<std::string> m_file_list;
-    if (fs::is_directory(path)) {
-        fs::path apk_path(path);
-        fs::directory_iterator end;
+    std::ifstream fin;
+    std::string line;
+    std::map<std::string, int> data;
+    // Open an existing file
+    fin.open("../metrics/train_data.csv");
+    std::getline(fin, line, '\n');
+    while(std::getline(fin, line, '\n')) {
+        size_t it = line.find(",");
+        auto filename = line.substr(0, it);
+        auto type = std::stoi(line.substr(it + 1));
 
-        for (fs::directory_iterator i(apk_path); i != end; ++i) {
-            const fs::path cp = (*i);
-            if (cp.extension() == ".jpg" || cp.extension() == ".jpeg") {
-                m_file_list.push_back(cp.string());
-            }
-        }
+        data[filename] = type;
     }
-    return m_file_list;
+    fin.close();
+    return data;
+}
+
+void trainClassificator() {
+    const auto &trainFileNames = fileutils::get_file_list("../images/train");
+    const auto &testFileNames = fileutils::get_file_list("../images/test");
+    const auto &intersectFileNames = fileutils::get_file_list("../images/Intersect");
+    ObjectDetector detectorBrisk;
+    std::vector<cv::Mat> trainImage;
+    std::vector<cv::Mat> testImage;
+    std::vector<int> labelsTrain, labelsTest;
+    auto data = read();
+    for (int i = 0; i < trainFileNames.size(); i++) {
+        auto train = cv::imread(trainFileNames[i]);
+
+        if (train.empty()) {
+            std::cerr << "Warning: Could not train image!" << std::endl;
+            continue;
+        }
+        cvtColor(train, train, cv::COLOR_BGR2GRAY);
+        labelsTrain.push_back(data[trainFileNames[i]]);
+        trainImage.push_back(train);
+
+    }
+
+    cv::Ptr<cv::ml::SVM> SVMbrisk;
+    detectorBrisk.train(trainImage, labelsTrain, SVMbrisk);
+//
+//    for (int i = 0; i < testFileNames.size(); i++) {
+//        auto test = cv::imread(testFileNames[i]);
+//
+//        if (test.empty()) {
+//            std::cerr << "Warning: Could not train image!" << std::endl;
+//            continue;
+//        }
+//        testImage.push_back(test);
+//    }
+//    for (int i = 0; i < intersectFileNames.size(); i++) {
+//        auto test = cv::imread(intersectFileNames[i]);
+//
+//        if (test.empty()) {
+//            std::cerr << "Warning: Could not train image!" << std::endl;
+//            continue;
+//        }
+//        testImage.push_back(test);
+//    }
+//    detectorBrisk.predict(testImage, SVMbrisk);
+    cv::VideoCapture video("../Video/Intersect.mp4");
+    detectorBrisk.predictVideo(video, SVMbrisk);
+
 }
 
 int main() {
-    auto algorithm = [](const std::string &type) {
-        auto model = cv::imread("../origins/" + type + ".jpg", cv::IMREAD_GRAYSCALE);
-        if (model.empty()) {
-            std::cerr << "ERROR: Could not process model image!" << std::endl;
-            return 1;
-        }
-        ObjectDetectorBrisk detector(model, "../metrics/" + type + ".csv");
-
-        const auto &allFileNames = get_file_list("../images/" + type);
-
-        std::cout << "If you don't want see all this " << allFileNames.size()
-                  << " photos, just press esc!\n" << "Otherwise press any other button to see next\n";
-
-        for (size_t i = 0; i < allFileNames.size(); i++) {
-            auto train = cv::imread(allFileNames[i], cv::IMREAD_GRAYSCALE);
-            float resizeCoef = 0.25f * (i % 5 + 2);
-            cv::resize(train, train, cv::Size(), resizeCoef, resizeCoef);
-
-            if (train.empty()) {
-                std::cerr << "Warning: Could not train image!" << std::endl;
-                continue;
-            }
-
-            detector.detectObject(train, allFileNames[i]);
-            if (detector.matchDescriptors()) {
-                detector.statisticAndDraw();
-            }
-        }
-    };
-    algorithm("surf_dataset");
-    algorithm("brisk_dataset");
+    fileutils::preprocessData();
+    trainClassificator();
     return 0;
 }

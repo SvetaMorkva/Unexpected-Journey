@@ -12,6 +12,6 @@ find_package(Boost 1.45.0 COMPONENTS filesystem)
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
-    add_executable(kpi_lab2 main.cpp ObjectDetectorBrisk.cpp ObjectDetectorBrisk.h)
+    add_executable(kpi_lab2 main.cpp ObjectDetector.cpp ObjectDetector.h fileutils.cpp fileutils.h)
     target_link_libraries(kpi_lab2 ${Boost_LIBRARIES} ${OpenCV_LIBS})
 endif()
