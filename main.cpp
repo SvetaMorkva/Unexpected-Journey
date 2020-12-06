@@ -39,7 +39,6 @@ void trainClassificator() {
             std::cerr << "Warning: Could not train image!" << std::endl;
             continue;
         }
-        cvtColor(train, train, cv::COLOR_BGR2GRAY);
         labelsTrain.push_back(data[trainFileNames[i]]);
         trainImage.push_back(train);
 
@@ -47,29 +46,29 @@ void trainClassificator() {
 
     cv::Ptr<cv::ml::SVM> SVMbrisk;
     detectorBrisk.train(trainImage, labelsTrain, SVMbrisk);
-//
-//    for (int i = 0; i < testFileNames.size(); i++) {
-//        auto test = cv::imread(testFileNames[i]);
-//
-//        if (test.empty()) {
-//            std::cerr << "Warning: Could not train image!" << std::endl;
-//            continue;
-//        }
-//        testImage.push_back(test);
-//    }
-//    for (int i = 0; i < intersectFileNames.size(); i++) {
-//        auto test = cv::imread(intersectFileNames[i]);
-//
-//        if (test.empty()) {
-//            std::cerr << "Warning: Could not train image!" << std::endl;
-//            continue;
-//        }
-//        testImage.push_back(test);
-//    }
-//    detectorBrisk.predict(testImage, SVMbrisk);
-    cv::VideoCapture video("../Video/Intersect.mp4");
-    detectorBrisk.predictVideo(video, SVMbrisk);
 
+    for (int i = 0; i < trainFileNames.size(); i++) {
+        auto test = cv::imread(trainFileNames[i]);
+
+        if (test.empty()) {
+            std::cerr << "Warning: Could not train image!" << std::endl;
+            continue;
+        }
+        testImage.push_back(test);
+    }
+    for (int i = 0; i < intersectFileNames.size(); i++) {
+        auto test = cv::imread(intersectFileNames[i]);
+
+        if (test.empty()) {
+            std::cerr << "Warning: Could not train image!" << std::endl;
+            continue;
+        }
+        testImage.push_back(test);
+    }
+    detectorBrisk.predict(testImage, SVMbrisk);
+    cv::VideoCapture video("../Video/Intersect.mp4");
+//    cv::VideoCapture video(0);
+    detectorBrisk.predictVideo(video, SVMbrisk);
 }
 
 int main() {

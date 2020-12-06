@@ -8,28 +8,38 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/opencv.hpp>
+#include <future>
 
 #include <fstream>
 
 class ObjectDetector {
 public:
-    ObjectDetector();
-    void predict(std::vector<cv::Mat> images, cv::Ptr<cv::ml::SVM>& svm);
+    void predict(const std::vector<cv::Mat>& images, cv::Ptr<cv::ml::SVM>& svm);
     void predictVideo(cv::VideoCapture video, cv::Ptr<cv::ml::SVM>& svm);
     void train(std::vector<cv::Mat> images, std::vector<int> labels, cv::Ptr<cv::ml::SVM>& svm);
 
 private:
-    cv::Mat getDescriptors(std::vector<cv::Mat> images);
+    void processFrame(cv::Mat img, cv::Ptr<cv::ml::SVM>& svm);
     std::pair<cv::Mat, std::vector<int>> getDescriptorsForTrain(std::vector<cv::Mat> images, std::vector<int> labels);
     void processModel();
-    bool checkProportionIsRight(std::vector<cv::Point2f> corners, std::vector<cv::Point2f> orgCorners);
-
-    int num_descr = 30;
+    cv::Mat rowForClassificator(int objNum, cv::Mat descriptors, std::vector<cv::KeyPoint> keypoints,
+                                std::vector<cv::Point2f> &scene_corners);
+    void drawReplace(std::vector<std::pair<int, std::vector<cv::Point2f>>> obj_corners);
 
     std::vector<cv::Mat> mModelDescr, mModelImg, mModelReplaceImg;
     std::vector<std::vector<cv::KeyPoint>> mModelKeyPoints;
+    std::vector<std::vector<cv::Point2f>> mObj_corners;
+    std::vector<std::vector<cv::Point2f>> mReplaceObj_corners;
 
-    std::map<int, std::vector<cv::Point2f>> mDetectedObjectRect;
+    cv::Ptr<cv::DescriptorExtractor> extractor;
+    cv::Ptr<cv::DescriptorMatcher> matcher;
+    cv::Mat mCurrentFrame;
+
+    const int num_descr = 20;
+    std::map<int, float> ratio_thresh = { {0, 0.68f}, {1, 0.72f} };
+    float resizeValue = 0.1;
+
+    const int minimumSize = 200;
 };
 
 
