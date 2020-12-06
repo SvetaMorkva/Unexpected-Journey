@@ -35,12 +35,12 @@ private:
     cv::Ptr<cv::DescriptorMatcher> matcher;
     cv::Mat mCurrentFrame;
 
-    const int num_descr = 50;
-    std::map<int, float> ratio_thresh = { {0, 0.69f},
-                                          {1, 0.74f} };
-    float resizeValue = 0.2;
+    const int num_descr = 15;
+    std::map<int, float> ratio_thresh = { {0, 0.707f},
+                                          {1, 0.727f} };
+    float resizeValue = 0.11;
 
-    const int minimumSize = 200;
+    const int minimumSize = 230;
 };
 
 

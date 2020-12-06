@@ -132,6 +132,10 @@ std::pair<Mat, std::vector<int>> ObjectDetector::getDescriptorsForTrain(std::vec
             if (!samples.empty()) {
                 outSamples.push_back(samples);
                 _labels.push_back(labels[i] == objNum + 1 ? labels[i] : 0);
+            } else if (labels[i] == 0) {
+                outSamples.push_back(Mat::zeros(1, extractor->descriptorSize() * num_descr,
+                                                CV_32FC1));
+                _labels.push_back(0);
             }
         }
     }
