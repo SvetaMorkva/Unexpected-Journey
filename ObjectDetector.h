@@ -24,7 +24,7 @@ private:
     void processModel();
     cv::Mat rowForClassificator(int objNum, cv::Mat descriptors, std::vector<cv::KeyPoint> keypoints,
                                 std::vector<cv::Point2f> &scene_corners);
-    void drawReplace(std::vector<std::pair<int, std::vector<cv::Point2f>>> obj_corners);
+    void drawReplace(const std::vector<std::pair<int, std::vector<cv::Point2f>>>& obj_corners);
 
     std::vector<cv::Mat> mModelDescr, mModelImg, mModelReplaceImg;
     std::vector<std::vector<cv::KeyPoint>> mModelKeyPoints;
@@ -35,9 +35,10 @@ private:
     cv::Ptr<cv::DescriptorMatcher> matcher;
     cv::Mat mCurrentFrame;
 
-    const int num_descr = 20;
-    std::map<int, float> ratio_thresh = { {0, 0.68f}, {1, 0.72f} };
-    float resizeValue = 0.1;
+    const int num_descr = 50;
+    std::map<int, float> ratio_thresh = { {0, 0.69f},
+                                          {1, 0.74f} };
+    float resizeValue = 0.2;
 
     const int minimumSize = 200;
 };

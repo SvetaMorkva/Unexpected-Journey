@@ -26,7 +26,6 @@ std::map<std::string, int> read()
 void trainClassificator() {
     const auto &trainFileNames = fileutils::get_file_list("../images/train");
     const auto &testFileNames = fileutils::get_file_list("../images/test");
-    const auto &intersectFileNames = fileutils::get_file_list("../images/Intersect");
     ObjectDetector detectorBrisk;
     std::vector<cv::Mat> trainImage;
     std::vector<cv::Mat> testImage;
@@ -47,17 +46,8 @@ void trainClassificator() {
     cv::Ptr<cv::ml::SVM> SVMbrisk;
     detectorBrisk.train(trainImage, labelsTrain, SVMbrisk);
 
-    for (int i = 0; i < trainFileNames.size(); i++) {
-        auto test = cv::imread(trainFileNames[i]);
-
-        if (test.empty()) {
-            std::cerr << "Warning: Could not train image!" << std::endl;
-            continue;
-        }
-        testImage.push_back(test);
-    }
-    for (int i = 0; i < intersectFileNames.size(); i++) {
-        auto test = cv::imread(intersectFileNames[i]);
+    for (int i = 0; i < testFileNames.size(); i++) {
+        auto test = cv::imread(testFileNames[i]);
 
         if (test.empty()) {
             std::cerr << "Warning: Could not train image!" << std::endl;

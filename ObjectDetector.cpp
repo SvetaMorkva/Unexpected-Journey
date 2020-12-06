@@ -7,7 +7,7 @@
 #include <opencv2/ml.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <thread>
-#include <future>
+#include <utility>
 
 #include "fileutils.h"
 
@@ -20,7 +20,7 @@ void ObjectDetector::train(std::vector<cv::Mat> images, std::vector<int> labels,
     matcher = DescriptorMatcher::create(BFMatcher::BRUTEFORCE_HAMMING);
 
     processModel();
-    auto pair = getDescriptorsForTrain(images, labels);
+    auto pair = getDescriptorsForTrain(std::move(images), std::move(labels));
 
     auto _samples = pair.first;
     auto _labels = pair.second;
@@ -60,9 +60,10 @@ void ObjectDetector::predictVideo(cv::VideoCapture video, cv::Ptr<cv::ml::SVM>& 
         num_frames++;
         processFrame(frame, svm);
 
-        imshow("Frame", mCurrentFrame);
+        imshow("Stream", mCurrentFrame);
         waitKey(1);
     }
+
     time(&end);
     double seconds = difftime (end, start);
     std::cout << "Time taken : " << seconds << " seconds" << std::endl;
@@ -210,7 +211,7 @@ cv::Mat ObjectDetector::rowForClassificator(int objNum, Mat descriptors, std::ve
     return samples;
 }
 
-void ObjectDetector::drawReplace(std::vector<std::pair<int, std::vector<Point2f>>> obj_corners) {
+void ObjectDetector::drawReplace(const std::vector<std::pair<int, std::vector<Point2f>>>& obj_corners) {
     Mat resultImg;
     RNG rng(12345);
     for (const auto &obj: obj_corners) {
