@@ -34,6 +34,10 @@ void fileutils::preprocessData() {
         fs::create_directory(trainFolder);
     }
 
+    if (!fs::exists("../metrics")) {
+        fs::create_directory("../metrics");
+    }
+
     std::ofstream fileLabels;
     fileLabels.open("../metrics/train_data.csv", std::ofstream::out | std::ofstream::trunc);
     fileLabels << "Image_name, Correct label\n";
